@@ -269,7 +269,7 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
     if (url.pathname === "/auth/discord") return handleDiscordLogin(req, res);
-    if (url.pathname === "/auth/discord/callback") return handleDiscordCallback(req, res);
+    if (url.pathname.startsWith("/auth/discord/callback")) return handleDiscordCallback(req, res);
     if (url.pathname === "/auth/logout") return handleLogout(req, res);
     if (url.pathname === "/api/me") return handleMe(req, res);
     if (url.pathname === "/api/staff") return handleStaff(req, res);
