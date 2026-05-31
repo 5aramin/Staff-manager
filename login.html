@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Staff Manager Panel</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #061126;
+      --panel: rgba(8, 18, 42, 0.68);
+      --panel-solid: rgba(9, 20, 47, 0.92);
+      --panel-border: rgba(139, 170, 255, 0.24);
+      --text: #f5f7ff;
+      --muted: #aebbe0;
+      --soft: rgba(174, 194, 255, 0.14);
+      --accent: #6f9dff;
+      --accent-strong: #8fb3ff;
+      --success: #82e8b2;
+      --warning: #ffd37d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(5, 11, 25, 0.2), rgba(5, 11, 25, 0.44)),
+        url("background.png") center / cover no-repeat fixed;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at center, rgba(96, 134, 224, 0.15), transparent 30%),
+        linear-gradient(90deg, rgba(3, 8, 20, 0.46), transparent 24%, transparent 76%, rgba(3, 8, 20, 0.46));
+    }
+
+    button,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 160ms ease, filter 160ms ease, background 160ms ease;
+    }
+
+    button:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .screen {
+      position: relative;
+      min-height: 100vh;
+      padding: 28px;
+    }
+
+    .login {
+      display: grid;
+      place-items: center;
+    }
+
+    .login-card {
+      width: min(430px, calc(100vw - 32px));
+      padding: 36px;
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+      backdrop-filter: blur(18px);
+      text-align: center;
+    }
+
+    .brand-mark {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 16px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(143, 179, 255, 0.34);
+      border-radius: 8px;
+      background: linear-gradient(145deg, rgba(92, 133, 226, 0.32), rgba(10, 21, 49, 0.64));
+      color: #dce7ff;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 26px;
+      line-height: 1.15;
+    }
+
+    h2 {
+      font-size: 18px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .login-card p {
+      margin-top: 10px;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .discord-button {
+      width: 100%;
+      height: 52px;
+      margin-top: 28px;
+      color: #06132d;
+      background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+      font-weight: 800;
+      box-shadow: 0 14px 28px rgba(50, 95, 196, 0.34);
+    }
+
+    .oauth-note {
+      margin-top: 16px;
+      padding: 12px;
+      border: 1px solid rgba(255, 211, 125, 0.24);
+      border-radius: 8px;
+      background: rgba(255, 211, 125, 0.08);
+      color: #ffe5ad;
+      font-size: 13px;
+      line-height: 1.45;
+      text-align: left;
+    }
+
+    .panel {
+      display: none;
+      width: min(1180px, 100%);
+      margin: 0 auto;
+    }
+
+    .panel.active,
+    .login.hidden {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 18px;
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mini-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(143, 179, 255, 0.34);
+      border-radius: 8px;
+      background: rgba(92, 133, 226, 0.2);
+      font-weight: 800;
+    }
+
+    .logout {
+      min-height: 40px;
+      padding: 0 14px;
+      border: 1px solid rgba(174, 194, 255, 0.22);
+      color: #dfe8ff;
+      background: rgba(4, 12, 31, 0.48);
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat,
+    .card {
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      background: var(--panel-solid);
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(18px);
+    }
+
+    .stat {
+      padding: 18px;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 27px;
+    }
+
+    .card {
+      padding: 18px;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    select {
+      min-height: 40px;
+      max-width: 100%;
+      border: 1px solid rgba(174, 194, 255, 0.22);
+      border-radius: 8px;
+      padding: 0 12px;
+      outline: none;
+      background: rgba(4, 12, 31, 0.58);
+      color: var(--text);
+    }
+
+    .role-list,
+    .area-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      padding: 7px 10px;
+      border: 1px solid rgba(174, 194, 255, 0.18);
+      border-radius: 999px;
+      background: var(--soft);
+      color: #dfe8ff;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid rgba(174, 194, 255, 0.13);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 14px;
+      border-bottom: 1px solid rgba(174, 194, 255, 0.11);
+      text-align: left;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    th {
+      color: #d9e2ff;
+      background: rgba(174, 194, 255, 0.08);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .status {
+      color: var(--success);
+      font-weight: 800;
+    }
+
+    .pending {
+      color: var(--warning);
+      font-weight: 800;
+    }
+
+    @media (max-width: 820px) {
+      .screen {
+        padding: 16px;
+      }
+
+      .topbar,
+      .card-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 520px) {
+      .login {
+        align-items: end;
+      }
+
+      .login-card {
+        padding: 28px 22px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="loginScreen" class="screen login">
+    <section class="login-card" aria-label="Discord inloggning">
+      <div class="brand-mark" aria-hidden="true">SW</div>
+      <h1>Staff Manager</h1>
+      <p>Koppla ditt Discord-konto. Endast personer med rollen Staff manager ska kunna öppna panelen.</p>
+      <button id="connectDiscord" class="discord-button" type="button">Koppla Discord</button>
+      <div id="oauthNote" class="oauth-note">
+        Demo: knappen simulerar en godkänd Staff manager-roll lokalt. I produktion ska den gå via Discord OAuth och servern ska kontrollera rollen med botten.
+      </div>
+    </section>
+  </main>
+
+  <section id="staffPanel" class="screen panel" aria-label="Staff panel">
+    <header class="topbar">
+      <div class="topbar-title">
+        <div class="mini-mark" aria-hidden="true">SW</div>
+        <div>
+          <h1>Staff Panel</h1>
+          <p id="signedInAs" class="muted">Inloggad via Discord</p>
+        </div>
+      </div>
+      <button id="logout" class="logout" type="button">Logga ut</button>
+    </header>
+
+    <div class="grid">
+      <section class="stats" aria-label="Översikt">
+        <article class="stat">
+          <span class="muted">Staff loggade</span>
+          <strong id="staffCount">0</strong>
+        </article>
+        <article class="stat">
+          <span class="muted">Staffroller</span>
+          <strong id="roleCount">0</strong>
+        </article>
+        <article class="stat">
+          <span class="muted">Verksamheter</span>
+          <strong id="areaCount">0</strong>
+        </article>
+        <article class="stat">
+          <span class="muted">Discord bot</span>
+          <strong class="pending">Redo</strong>
+        </article>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2>Staffroller som loggas</h2>
+            <p class="muted">Botten ska hämta alla med någon av dessa roller.</p>
+          </div>
+        </div>
+        <div id="roleList" class="role-list"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2>Verksamheter</h2>
+            <p class="muted">Ansvarsområden som kan kopplas till varje staff.</p>
+          </div>
+        </div>
+        <div id="areaList" class="area-list"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2>Staff logg</h2>
+            <p class="muted">Visar Discord-användare, roll och ansvarig verksamhet.</p>
+          </div>
+          <select id="areaFilter" aria-label="Filtrera verksamhet">
+            <option value="Alla">Alla verksamheter</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Discord</th>
+                <th>Roll</th>
+                <th>Verksamhet</th>
+                <th>Status</th>
+                <th>Senast loggad</th>
+              </tr>
+            </thead>
+            <tbody id="staffRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <script>
+    const staffManagerRole = "Staff manager";
+    const staffRoles = [
+      "Helper",
+      "Trail mod",
+      "Mod",
+      "Sr.Mod",
+      "Head-Mod",
+      "Admin",
+      "Sr.Admin",
+      "Delägare",
+      "Ägare"
+    ];
+
+    const responsibilityAreas = [
+      "Verksamhetsansvarig Handling",
+      "Verksamhetsansvarig Forum",
+      "Verksamhetsansvarig Kriminell",
+      "Verksamhetsansvarig Servervakt",
+      "Verksamhetsansvarig Jobb",
+      "Verksamhetsansvarig Medlem",
+      "Verksamhetsansvarig Event",
+      "Verksamhetsansvarig Ped",
+      "Handlings Ansvarig",
+      "Staff Manager",
+      "Ticket Ansvarig",
+      "Forums Ansvarig",
+      "Kriminell Ansvarig",
+      "Donation Manager",
+      "Servervakt Ansvarig",
+      "Jobb Ansvarig",
+      "Support Ansvarig",
+      "Event Ansvarig",
+      "Ped Ansvarig",
+      "Dubbelarbetare Ansvarig",
+      "Ped Admin",
+      "Gang Admin",
+      "Medlemskaps Ansvarig"
+    ];
+
+    const demoStaff = [
+      { username: "SweWave Helper", role: "Helper", area: "Support ansvarig", status: "Aktiv", lastSeen: "Idag" },
+      { username: "Ticket Lead", role: "Trail mod", area: "Ticket Ansvarig", status: "Aktiv", lastSeen: "Idag" },
+      { username: "ForumFix", role: "Mod", area: "Forums Ansvarig", status: "Aktiv", lastSeen: "Igår" },
+      { username: "CrimeUnit", role: "Sr.Mod", area: "Kriminell Ansvarig", status: "Aktiv", lastSeen: "Igår" },
+      { username: "Headwave", role: "Head-Mod", area: "Staff Manager", status: "Aktiv", lastSeen: "Idag" },
+      { username: "AdminOne", role: "Admin", area: "Jobb Ansvarig", status: "Aktiv", lastSeen: "Idag" },
+      { username: "SeniorAdmin", role: "Sr.Admin", area: "Donation Manager", status: "Aktiv", lastSeen: "2 dagar sedan" },
+      { username: "CoOwner", role: "Delägare", area: "Event Ansvarig", status: "Aktiv", lastSeen: "Idag" },
+      { username: "Owner", role: "Ägare", area: "Staff Manager", status: "Aktiv", lastSeen: "Idag" }
+    ];
+
+    const loginScreen = document.querySelector("#loginScreen");
+    const staffPanel = document.querySelector("#staffPanel");
+    const signedInAs = document.querySelector("#signedInAs");
+    const staffRows = document.querySelector("#staffRows");
+    const roleList = document.querySelector("#roleList");
+    const areaList = document.querySelector("#areaList");
+    const areaFilter = document.querySelector("#areaFilter");
+    const oauthNote = document.querySelector("#oauthNote");
+    const isDemoPreview = location.port === "4173" || location.protocol.startsWith("file");
+    let currentStaff = demoStaff;
+
+    function setAuthorizedUser(user, staff = demoStaff) {
+      localStorage.setItem("staffPanelUser", JSON.stringify(user));
+      showPanel(user, staff);
+    }
+
+    function getAuthorizedUser() {
+      try {
+        return JSON.parse(localStorage.getItem("staffPanelUser"));
+      } catch {
+        return null;
+      }
+    }
+
+    function hasStaffManagerRole(user) {
+      return user?.roles?.includes(staffManagerRole);
+    }
+
+    function showPanel(user, staff = demoStaff) {
+      if (!hasStaffManagerRole(user)) {
+        loginScreen.classList.remove("hidden");
+        staffPanel.classList.remove("active");
+        return;
+      }
+
+      signedInAs.textContent = `Inloggad som ${user.username} via Discord`;
+      loginScreen.classList.add("hidden");
+      staffPanel.classList.add("active");
+      renderPanel(staff);
+    }
+
+    function renderPills(container, items) {
+      container.innerHTML = "";
+      for (const item of items) {
+        const pill = document.createElement("span");
+        pill.className = "pill";
+        pill.textContent = item;
+        container.append(pill);
+      }
+    }
+
+    function renderFilters() {
+      for (const area of responsibilityAreas) {
+        const option = document.createElement("option");
+        option.value = area;
+        option.textContent = area;
+        areaFilter.append(option);
+      }
+    }
+
+    function renderRows(staff) {
+      const selectedArea = areaFilter.value;
+      const filtered = selectedArea === "Alla"
+        ? staff
+        : staff.filter((member) => member.area === selectedArea);
+
+      staffRows.innerHTML = "";
+      for (const member of filtered) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${member.username}</td>
+          <td>${member.role}</td>
+          <td>${member.area}</td>
+          <td><span class="status">${member.status}</span></td>
+          <td>${member.lastSeen}</td>
+        `;
+        staffRows.append(row);
+      }
+    }
+
+    function renderPanel(staff) {
+      currentStaff = staff;
+      document.querySelector("#staffCount").textContent = staff.length;
+      document.querySelector("#roleCount").textContent = staffRoles.length;
+      document.querySelector("#areaCount").textContent = responsibilityAreas.length;
+      renderPills(roleList, staffRoles);
+      renderPills(areaList, responsibilityAreas);
+      renderRows(staff);
+    }
+
+    async function loadProductionSession() {
+      try {
+        const meResponse = await fetch("/api/me", { credentials: "include" });
+        if (!meResponse.ok) return;
+
+        const me = await meResponse.json();
+        if (!me.authenticated) return;
+
+        const staffResponse = await fetch("/api/staff", { credentials: "include" });
+        const staffData = staffResponse.ok ? await staffResponse.json() : { staff: [] };
+        showPanel(me.user, staffData.staff || []);
+      } catch {
+        loginScreen.classList.remove("hidden");
+        staffPanel.classList.remove("active");
+      }
+    }
+
+    document.querySelector("#connectDiscord").addEventListener("click", () => {
+      if (!isDemoPreview) {
+        location.href = "/auth/discord";
+        return;
+      }
+
+      setAuthorizedUser({
+        id: "demo-discord-user",
+        username: "Staff Manager",
+        roles: [staffManagerRole]
+      });
+    });
+
+    document.querySelector("#logout").addEventListener("click", () => {
+      if (!isDemoPreview) {
+        location.href = "/auth/logout";
+        return;
+      }
+
+      localStorage.removeItem("staffPanelUser");
+      staffPanel.classList.remove("active");
+      loginScreen.classList.remove("hidden");
+    });
+
+    areaFilter.addEventListener("change", () => renderRows(currentStaff));
+    renderFilters();
+    if (isDemoPreview) {
+      oauthNote.textContent = "Demo: knappen simulerar en godkänd Staff manager-roll lokalt. Öppna sidan via http://127.0.0.1:3000/login.html för riktig Discord OAuth.";
+      showPanel(getAuthorizedUser());
+    } else {
+      oauthNote.textContent = "När du klickar kopplas du till Discord OAuth. Efter godkännande kontrollerar servern att du har Staff Manager-rollen.";
+      loadProductionSession();
+    }
+  </script>
+</body>
+</html>
