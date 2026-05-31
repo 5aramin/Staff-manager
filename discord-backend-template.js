@@ -181,7 +181,7 @@ async function handleDiscordCallback(req, res) {
   });
 
   send(res, 302, "", {
-    location: "/login.html",
+    location: "/",
     "set-cookie": `staff_session=${encodeURIComponent(sessionId)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=28800`
   });
 }
@@ -210,7 +210,7 @@ async function handleLogout(req, res) {
   }
 
   send(res, 302, "", {
-    location: "/login.html",
+    location: "/",
     "set-cookie": "staff_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0"
   });
 }
