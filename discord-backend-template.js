@@ -7,7 +7,7 @@ const path = require("node:path");
 loadEnvFile(path.join(__dirname, ".env"));
 
 const PORT = Number(process.env.PORT || 3000);
-const PUBLIC_DIR = __dirname;
+const PUBLIC_DIR = process.cwd();
 const DISCORD_API = "https://discord.com/api/v10";
 
 const config = {
